@@ -1,3 +1,4 @@
+// ========== lib/weather_service.dart ==========
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:weather_app/weather_model.dart';
@@ -12,11 +13,18 @@ class WeatherService {
         'https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$_apiKey';
 
     final weatherRes = await http.get(Uri.parse(weatherUrl));
-    if (weatherRes.statusCode != 200) {
-      throw Exception('City not found');
+    if (weatherRes.statusCode == 404) {
+      throw Exception(
+          'City "$city" not found. Please check the spelling and try again.');
+    } else if (weatherRes.statusCode != 200) {
+      throw Exception(
+          'Failed to load weather data (Error ${weatherRes.statusCode})');
     }
 
     final forecastRes = await http.get(Uri.parse(forecastUrl));
+    if (forecastRes.statusCode != 200) {
+      throw Exception('Failed to load forecast');
+    }
 
     final weatherData = json.decode(weatherRes.body);
     final forecastData = json
